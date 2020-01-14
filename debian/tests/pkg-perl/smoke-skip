@@ -1,0 +1,2 @@
+# checks for Bundle::DBD::mysql which is not installed in the Debian package
+t/version.t

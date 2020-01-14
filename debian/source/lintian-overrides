@@ -1,0 +1,3 @@
+# pkg-perl specific lintian check
+# in this case we indeed use an explicit test control file
+libdbd-mysql-perl source: nonteam-testsuite-header autopkgtest

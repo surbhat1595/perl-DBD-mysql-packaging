@@ -1,0 +1,7 @@
+# mysql setup
+MYSQL_DIR=$(pwd)/t/testdb
+MYSQL_UNIX_PORT=$(pwd)/t/testdb/mysql.sock
+MYSQL_PIDFILE=$(pwd)/t/testdb/mysql.pid
+MYSQL_USER=$(whoami)
+MYSQL_PASS=
+MYSQL_DBNAME=test

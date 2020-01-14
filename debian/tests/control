@@ -1,0 +1,12 @@
+Test-Command: /usr/share/pkg-perl-autopkgtest/runner runtime-deps
+Depends: @, pkg-perl-autopkgtest
+
+Test-Command: /usr/share/pkg-perl-autopkgtest/runner runtime-deps-and-recommends
+Depends: @, pkg-perl-autopkgtest
+Restrictions: needs-recommends
+
+Test-Command: /usr/share/pkg-perl-autopkgtest/runner build-deps
+Depends: @, libdbi-perl, libtest-deep-perl, perl, procps, mariadb-server, pkg-perl-autopkgtest
+
+Test-Command: /usr/share/pkg-perl-autopkgtest/runner build-deps
+Depends: @, libdbi-perl, libtest-deep-perl, perl, procps, mysql-server (>= 5.7), pkg-perl-autopkgtest

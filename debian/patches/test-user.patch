@@ -1,0 +1,25 @@
+Description: mark a test as TODO
+ which fails in our test setup because we have no users
+ (besides the password-less socket-using root)
+ in our test database
+Origin: vendor
+Forwarded: not-needed
+Author: gregor herrmann <gregoa@debian.org>
+Last-Update: 2016-10-04
+
+--- a/t/10connect.t
++++ b/t/10connect.t
+@@ -68,10 +68,13 @@ ok($dbh->disconnect(), 'Disconnected');
+ # and $password parameters.
+ # see https://rt.cpan.org/Ticket/Display.html?id=89835
+ 
++TODO: {
++local $TODO = "We don't have a user in our test database.";
+ eval {$dbh= DBI->connect($test_dsn, $test_user, $test_password,
+    { RaiseError => 1, PrintError => 1, AutoCommit => 0,
+      Username => '4yZ73s9qeECdWi', Password => '64heUGwAsVoNqo' });};
+ ok($@, 'Username and Password attributes override');
++}
+ 
+ eval {$dbh= DBI->connect($test_dsn, '4yZ73s9qeECdWi', '64heUGwAsVoNqo',
+    { RaiseError => 1, PrintError => 1, AutoCommit => 0,
