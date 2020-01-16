@@ -64,8 +64,9 @@ find %{buildroot} -type f -name '*.bs' -empty -delete
 #make test
 
 %files
-%license LICENSE
-%doc Changes README.md
+%doc LICENSE
+%doc Changes
+%doc README.md
 %{perl_vendorarch}/Bundle/
 %{perl_vendorarch}/DBD/
 %{perl_vendorarch}/auto/DBD/

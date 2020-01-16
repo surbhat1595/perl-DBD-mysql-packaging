@@ -2,8 +2,8 @@ Source: libdbd-mysql-perl
 Maintainer: Percona Development Team <info@percona.com>
 Section: perl
 Priority: optional
-Build-Depends: debhelper (>= 10),
-               libperconaserverclient21-dev,
+Build-Depends: debhelper,
+               libperconaserverclient21-dev | libperconaserverclient20-dev | libperconaserverclient18.1-dev,
                percona-server-server,
                libdbi-perl,
                libtest-deep-perl,
@@ -13,10 +13,12 @@ Build-Depends: debhelper (>= 10),
 
 Package: libdbd-mysql-perl
 Architecture: any
-Depends: ${misc:Depends},
-         ${perl:Depends},
-         ${shlibs:Depends},
-         libdbi-perl
+Depends: perl,
+	 libc6,
+	 libperconaserverclient18.1 | libperconaserverclient20 | libperconaserverclient21,
+	 libssl1.1,
+	 zlib1g,
+	 libdbi-perl
 Description: Perl5 database interface to the MariaDB/MySQL database
  DBD::mysql is the Perl5 Database Interface driver for the MariaDB/MySQL
  database. In other words: DBD::mysql is an interface between the Perl
