@@ -15,7 +15,6 @@ Package: libdbd-mysql-perl
 Architecture: any
 Depends: perl,
 	 libc6,
-	 libperconaserverclient18.1 | libperconaserverclient20 | libperconaserverclient21,
 	 libssl1.1,
 	 zlib1g,
 	 libdbi-perl

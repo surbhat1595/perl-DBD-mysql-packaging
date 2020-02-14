@@ -18,6 +18,10 @@ export MYSQL_DBNAME=test
 
 override_dh_auto_configure:
 	LC_ALL=C.UTF-8 dh_auto_configure
+	sed -i 's/x86_64-linux-gnu-gcc/x86_64-linux-gnu-g++/g' Makefile
+	sed -i 's:-lperconaserverclient::g' Makefile
+	sed -i 's:CCCDLFLAGS = -fPIC:CCCDLFLAGS = -fPIC -fpermissive:' Makefile
+	sed -i 's:-L/usr/lib/x86_64-linux-gnu:/usr/lib/x86_64-linux-gnu/libperconaserverclient.a -L/usr/lib/x86_64-linux-gnu:g' Makefile
 
 override_dh_auto_test:
 ifeq (,$(filter nocheck,$(DEB_BUILD_OPTIONS)))

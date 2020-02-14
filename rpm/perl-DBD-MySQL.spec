@@ -52,6 +52,13 @@ find . -type f | xargs chmod -x
 
 %build
 perl Makefile.PL INSTALLDIRS=vendor OPTIMIZE="%{optflags}" NO_PACKLIST=1
+sed -i 's:CCCDLFLAGS = -fPIC:CCCDLFLAGS = -fPIC -fpermissive:' Makefile
+sed -i 's:CC = gcc:CC = g++:' Makefile
+sed -i 's:LD = gcc:LD = g++:' Makefile
+sed -i 's:gcc -E:g++ -E:' Makefile
+sed -i 's:EXTRALIBS = -L/usr/lib64/mysql:EXTRALIBS = /usr/lib64/mysql/libmysqlclient.a -L/usr/lib64/mysql:' Makefile
+sed -i 's:LDLOADLIBS = -L/usr/lib64/mysql:LDLOADLIBS = /usr/lib64/mysql/libmysqlclient.a -L/usr/lib64/mysql:' Makefile
+sed -i 's:-lmysqlclient::g' Makefile
 make %{?_smp_mflags}
 
 %install

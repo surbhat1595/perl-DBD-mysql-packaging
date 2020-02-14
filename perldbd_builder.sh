@@ -95,6 +95,8 @@ EOL
   fi
   wget -qO - http://jenkins.percona.com/apt-repo/8507EFA5.pub | apt-key add -
   wget https://repo.percona.com/apt/percona-release_latest.generic_all.deb
+  apt update
+  apt-get install -y gnupg2
   dpkg -i percona-release_latest.generic_all.deb
   percona-release setup ps80
   return
@@ -150,8 +152,9 @@ get_sources(){
       export DESTINATION=experimental
     fi 
     #
+    TIMESTAMP=$(date "+%Y%m%d-%H%M%S")
     echo "DESTINATION=${DESTINATION}" >> perldbd.properties
-    echo "UPLOAD=UPLOAD/builds/${PRODUCT}/${PRODUCT_FULL}/${BRANCH_NAME}/${REVISION}" >> perldbd.properties
+    echo "UPLOAD=UPLOAD/builds/${PRODUCT}/${PRODUCT_FULL}/${BRANCH_NAME}/${REVISION}/${TIMESTAMP}" >> perldbd.properties
     #
     tar -zcvf ${NAME}-${VERSION}.tar.gz ${NAME}-${VERSION}
     
@@ -194,10 +197,18 @@ install_deps() {
     then
         add_percona_yum_repo
         yum -y install git wget
-        yum -y install epel-release rpmdevtools bison yum-utils percona-server-devel percona-server-server  perl-ExtUtils-MakeMaker perl-Data-Dumper perl-Devel-CheckLib gcc perl-DBI perl-generators openssl-devel
+        yum -y install epel-release rpmdevtools bison yum-utils percona-server-devel percona-server-server  perl-ExtUtils-MakeMaker perl-Data-Dumper gcc perl-DBI perl-generators openssl-devel
+	yum -y install gcc-c++
+	yum -y install perl-Devel-CheckLib
         if [ ${RHEL} == 8 ]; then
             yum -y install openssl-devel rpmdevtools bison yum-utils percona-server-devel percona-server-server perl-ExtUtils-MakeMaker perl-Data-Dumper gcc perl-DBI perl-generators
             yum -y install http://mirror.centos.org/centos/8/PowerTools/x86_64/os/Packages/perl-Devel-CheckLib-1.11-5.el8.noarch.rpm
+	else
+            until yum -y install centos-release-scl; do
+                echo "waiting"
+                sleep 1
+            done
+            yum -y install  gcc-c++ devtoolset-8-gcc-c++ devtoolset-8-binutils devtoolset-8-gcc devtoolset-8-gcc-c++
         fi
         cd $WORKDIR
         link="https://raw.githubusercontent.com/EvgeniyPatlan/perl-DBD-mysql-packaging/master/rpm/perl-DBD-MySQL.spec"
@@ -327,6 +338,9 @@ build_rpm(){
     SRCRPM=$(basename $(find . -name '*.src.rpm' | sort | tail -n1))
     mkdir -vp rpmbuild/{SOURCES,SPECS,BUILD,SRPMS,RPMS}
     mv *.src.rpm rpmbuild/SRPMS
+    if [ -f /opt/rh/devtoolset-8/enable ]; then
+        source /opt/rh/devtoolset-8/enable
+    fi
     rpmbuild --define "_topdir ${WORKDIR}/rpmbuild" --define "dist .el${RHEL}" --rebuild rpmbuild/SRPMS/${SRCRPM}
     return_code=$?
     if [ $return_code != 0 ]; then
