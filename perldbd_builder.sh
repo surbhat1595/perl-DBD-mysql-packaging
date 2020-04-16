@@ -81,7 +81,8 @@ add_percona_yum_repo(){
       mv -f percona-dev.repo /etc/yum.repos.d/
     fi
     yum -y install https://repo.percona.com/yum/percona-release-latest.noarch.rpm
-    percona-release setup ps80
+    percona-release enable ps-80 testing
+    percona-release enable tools testing
     return
 }
 
@@ -98,7 +99,8 @@ EOL
   apt update
   apt-get install -y gnupg2
   dpkg -i percona-release_latest.generic_all.deb
-  percona-release setup ps80
+  percona-release enable ps-80 testing
+  percona-release enable tools testing
   return
 }
 
