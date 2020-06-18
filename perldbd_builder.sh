@@ -203,6 +203,12 @@ install_deps() {
 	yum -y install gcc-c++
 	yum -y install perl-Devel-CheckLib
         if [ ${RHEL} == 8 ]; then
+	    dnf module -y disable mysql
+            yum -y install epel-release
+	    dnf config-manager --set-enabled codeready-builder-for-rhel-8-x86_64-rpms
+            dnf clean all
+            rm -r /var/cache/dnf
+            dnf -y upgrade
             yum -y install openssl-devel rpmdevtools bison yum-utils percona-server-devel percona-server-server perl-ExtUtils-MakeMaker perl-Data-Dumper gcc perl-DBI perl-generators
             yum -y install http://mirror.centos.org/centos/8/PowerTools/x86_64/os/Packages/perl-Devel-CheckLib-1.11-5.el8.noarch.rpm
 	else
@@ -430,7 +436,9 @@ build_deb(){
     #
     dpkg-source -x ${DSC}
     cd ${DIRNAME}
-
+    if [ "x${DEBIAN_VERSION}" = "xxenial" ]; then
+        sed -i 's/libssl1.1/libssl1.0.0/' debian/control
+    fi
     dch -b -m -D "$DEBIAN_VERSION" --force-distribution -v "1:${VERSION}-${DEB_RELEASE}.${DEBIAN_VERSION}" 'Update distribution'
     #
     dpkg-buildpackage -rfakeroot -uc -us -b
@@ -457,8 +465,8 @@ ARCH=
 OS=
 DBD_BRANCH="4_050"
 INSTALL=0
-RPM_RELEASE=1
-DEB_RELEASE=1
+RPM_RELEASE=3
+DEB_RELEASE=3
 REVISION=0
 PACKAGING_REPO="https://github.com/EvgeniyPatlan/perl-DBD-mysql-packaging.git"
 NAME=perl-DBD-MySQL
