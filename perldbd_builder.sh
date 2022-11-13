@@ -75,10 +75,12 @@ check_workdir(){
 }
 
 add_percona_yum_repo(){
-    if [ ! -f /etc/yum.repos.d/percona-dev.repo ]
-    then
-      wget http://jenkins.percona.com/yum-repo/percona-dev.repo
-      mv -f percona-dev.repo /etc/yum.repos.d/
+    if [ $RHEL < 9 ]; then
+        if [ ! -f /etc/yum.repos.d/percona-dev.repo ]
+        then
+            wget http://jenkins.percona.com/yum-repo/percona-dev.repo
+            mv -f percona-dev.repo /etc/yum.repos.d/
+        fi
     fi
     yum -y install https://repo.percona.com/yum/percona-release-latest.noarch.rpm
     percona-release enable ps-80 testing
@@ -199,16 +201,20 @@ install_deps() {
     CURPLACE=$(pwd)
     if [ "x$OS" = "xrpm" ]
     then
-        add_percona_yum_repo
         yum -y install git wget
         yum -y install epel-release rpmdevtools bison yum-utils percona-server-devel percona-server-server  perl-ExtUtils-MakeMaker perl-Data-Dumper gcc perl-DBI perl-generators openssl-devel
 	yum -y install gcc-c++
 	yum -y install perl-Devel-CheckLib
-        if [ ${RHEL} == 8 ]; then
+        if [ ${RHEL} == 8 || ${RHEL} == 9 ]; then
+            yum -y install dnf-plugins-core
 	    dnf module -y disable mysql
-            yum -y install epel-release
-	    dnf config-manager --set-enabled codeready-builder-for-rhel-8-x86_64-rpms
-            dnf --enablerepo=powertools install perl-Devel-CheckLib
+            #yum -y install epel-release
+            add_percona_yum_repo
+            if [ "x$RHEL" = "x8" ]; then
+                yum config-manager --set-enabled PowerTools || yum config-manager --set-enabled powertools
+                subscription-manager repos --enable codeready-builder-for-rhel-8-x86_64-rpms
+            fi
+            yum -y install perl-Devel-CheckLib
             dnf clean all
             rm -r /var/cache/dnf
             dnf -y upgrade
