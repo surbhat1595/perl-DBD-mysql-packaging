@@ -208,11 +208,12 @@ install_deps() {
 	    dnf module -y disable mysql
             yum -y install epel-release
 	    dnf config-manager --set-enabled codeready-builder-for-rhel-8-x86_64-rpms
+            dnf --enablerepo=powertools install perl-Devel-CheckLib
             dnf clean all
             rm -r /var/cache/dnf
             dnf -y upgrade
             yum -y install openssl-devel rpmdevtools bison yum-utils percona-server-devel percona-server-server perl-ExtUtils-MakeMaker perl-Data-Dumper gcc perl-DBI perl-generators
-            yum -y install http://mirror.centos.org/centos/8/PowerTools/x86_64/os/Packages/perl-Devel-CheckLib-1.11-5.el8.noarch.rpm
+            #yum -y install http://mirror.centos.org/centos/8/PowerTools/x86_64/os/Packages/perl-Devel-CheckLib-1.11-5.el8.noarch.rpm
 	else
             until yum -y install centos-release-scl; do
                 echo "waiting"
