@@ -100,7 +100,7 @@ EOL
   apt update
   apt-get install -y gnupg2
   #dpkg -i percona-release_latest.generic_all.deb
-  dpkg -i percona-release_1.0-27.generic_all.deb
+  dpkg -i percona-release_1.0-28.generic_all.deb
   percona-release enable ps-80 testing
   percona-release enable tools testing
   return
@@ -470,7 +470,7 @@ INSTALL=0
 RPM_RELEASE=3
 DEB_RELEASE=3
 REVISION=0
-PACKAGING_REPO="https://github.com/EvgeniyPatlan/perl-DBD-mysql-packaging.git"
+PACKAGING_REPO="https://github.com/adivinho/perl-DBD-mysql-packaging.git"
 NAME=perl-DBD-MySQL
 parse_arguments PICK-ARGS-FROM-ARGV "$@"
 VERSION=$DBD_BRANCH
