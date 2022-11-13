@@ -95,7 +95,7 @@ EOL
     sed -i "s:@@DIST@@:$OS_NAME:g" /etc/apt/sources.list.d/percona-dev.list
   fi
   wget -qO - http://jenkins.percona.com/apt-repo/8507EFA5.pub | apt-key add -
-  wget https://repo.percona.com/apt/pool/testing/p/percona-release/percona-release_1.0-27.generic_all.deb
+  wget https://repo.percona.com/apt/pool/testing/p/percona-release/percona-release_1.0-28.generic_all.deb
   #wget https://repo.percona.com/apt/percona-release_latest.generic_all.deb
   apt update
   apt-get install -y gnupg2
