@@ -75,7 +75,7 @@ check_workdir(){
 }
 
 add_percona_yum_repo(){
-    if [ $RHEL < 9 ]; then
+    if [ ${RHEL} == 7 || ${RHEL} == 8 ]; then
         if [ ! -f /etc/yum.repos.d/percona-dev.repo ]
         then
             wget http://jenkins.percona.com/yum-repo/percona-dev.repo
@@ -205,11 +205,11 @@ install_deps() {
         yum -y install epel-release rpmdevtools bison yum-utils percona-server-devel percona-server-server  perl-ExtUtils-MakeMaker perl-Data-Dumper gcc perl-DBI perl-generators openssl-devel
 	yum -y install gcc-c++
 	yum -y install perl-Devel-CheckLib
+        add_percona_yum_repo
         if [ ${RHEL} == 8 || ${RHEL} == 9 ]; then
             yum -y install dnf-plugins-core
 	    dnf module -y disable mysql
             #yum -y install epel-release
-            add_percona_yum_repo
             if [ "x$RHEL" = "x8" ]; then
                 yum config-manager --set-enabled PowerTools || yum config-manager --set-enabled powertools
                 subscription-manager repos --enable codeready-builder-for-rhel-8-x86_64-rpms
