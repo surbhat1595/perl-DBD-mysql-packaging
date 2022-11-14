@@ -201,18 +201,17 @@ install_deps() {
     CURPLACE=$(pwd)
     if [ "x$OS" = "xrpm" ]
     then
-        yum -y install git wget
         yum -y install epel-release rpmdevtools bison yum-utils percona-server-devel percona-server-server  perl-ExtUtils-MakeMaker perl-Data-Dumper gcc perl-DBI perl-generators openssl-devel
-	yum -y install gcc-c++
-	yum -y install perl-Devel-CheckLib
+        yum -y install gcc-c++
         add_percona_yum_repo
         if [ "x$RHEL" = "x8" -o "x$RHEL" == "x9" ]; then
             yum -y install dnf-plugins-core
-	    dnf module -y disable mysql
-            #yum -y install epel-release
             if [ "x$RHEL" = "x8" ]; then
+                dnf module -y disable mysql
                 yum config-manager --set-enabled PowerTools || yum config-manager --set-enabled powertools
                 subscription-manager repos --enable codeready-builder-for-rhel-8-x86_64-rpms
+            else
+                yum-config-manager --enable ol9_codeready_builder
             fi
             yum -y install perl-Devel-CheckLib
             dnf clean all
@@ -225,6 +224,7 @@ install_deps() {
                 echo "waiting"
                 sleep 1
             done
+	    yum -y install perl-Devel-CheckLib
             yum -y install  gcc-c++ devtoolset-8-gcc-c++ devtoolset-8-binutils devtoolset-8-gcc devtoolset-8-gcc-c++
         fi
         cd $WORKDIR
