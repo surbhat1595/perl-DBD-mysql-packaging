@@ -75,7 +75,7 @@ check_workdir(){
 }
 
 add_percona_yum_repo(){
-    if [ ${RHEL} == 7 || ${RHEL} == 8 ]; then
+    if [ "x${RHEL}" == "x7" || "x${RHEL}" == "x8" ]; then
         if [ ! -f /etc/yum.repos.d/percona-dev.repo ]
         then
             wget http://jenkins.percona.com/yum-repo/percona-dev.repo
@@ -214,7 +214,6 @@ install_deps() {
                 yum-config-manager --enable ol9_codeready_builder
                 yum-config-manager --enable ol9_appstream
             fi
-            yum -y install perl-Devel-CheckLib
             dnf clean all
             rm -r /var/cache/dnf
             dnf -y upgrade
@@ -226,9 +225,9 @@ install_deps() {
                 echo "waiting"
                 sleep 1
             done
-	    yum -y install perl-Devel-CheckLib
             yum -y install  gcc-c++ devtoolset-8-gcc-c++ devtoolset-8-binutils devtoolset-8-gcc devtoolset-8-gcc-c++
         fi
+	yum -y install perl-Devel-CheckLib
         cd $WORKDIR
         link="https://raw.githubusercontent.com/EvgeniyPatlan/perl-DBD-mysql-packaging/master/rpm/perl-DBD-MySQL.spec"
         wget $link
