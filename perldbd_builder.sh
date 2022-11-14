@@ -201,7 +201,7 @@ install_deps() {
     CURPLACE=$(pwd)
     if [ "x$OS" = "xrpm" ]
     then
-        yum -y install epel-release rpmdevtools bison yum-utils percona-server-devel percona-server-server  perl-ExtUtils-MakeMaker perl-Data-Dumper gcc perl-DBI perl-generators openssl-devel
+        yum -y install epel-release
         yum -y install gcc-c++
         add_percona_yum_repo
         if [ "x$RHEL" = "x8" -o "x$RHEL" == "x9" ]; then
@@ -212,6 +212,7 @@ install_deps() {
                 subscription-manager repos --enable codeready-builder-for-rhel-8-x86_64-rpms
             else
                 yum-config-manager --enable ol9_codeready_builder
+                yum-config-manager --enable ol9_appstream
             fi
             yum -y install perl-Devel-CheckLib
             dnf clean all
@@ -220,6 +221,7 @@ install_deps() {
             yum -y install openssl-devel rpmdevtools bison yum-utils percona-server-devel percona-server-server perl-ExtUtils-MakeMaker perl-Data-Dumper gcc perl-DBI perl-generators
             #yum -y install http://mirror.centos.org/centos/8/PowerTools/x86_64/os/Packages/perl-Devel-CheckLib-1.11-5.el8.noarch.rpm
 	else
+            yum -y install rpmdevtools bison yum-utils percona-server-devel percona-server-server  perl-ExtUtils-MakeMaker perl-Data-Dumper gcc perl-DBI perl-generators openssl-devel
             until yum -y install centos-release-scl; do
                 echo "waiting"
                 sleep 1
