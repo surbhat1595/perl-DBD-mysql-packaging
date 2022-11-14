@@ -206,7 +206,7 @@ install_deps() {
 	yum -y install gcc-c++
 	yum -y install perl-Devel-CheckLib
         add_percona_yum_repo
-        if [ ${RHEL} == 8 || ${RHEL} == 9 ]; then
+        if [ "x$RHEL" = "x8" -o "x$RHEL" == "x9" ]; then
             yum -y install dnf-plugins-core
 	    dnf module -y disable mysql
             #yum -y install epel-release
