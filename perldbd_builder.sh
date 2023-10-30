@@ -449,7 +449,7 @@ build_deb(){
     if [ "x${DEBIAN_VERSION}" = "xxenial" ]; then
         sed -i 's/libssl1.1/libssl1.0.0/' debian/control
     fi
-    if [ "x${DEBIAN_VERSION}" = "xbookworm" ]; then
+    if [ "x${DEBIAN_VERSION}" = "xjammy" || "x${DEBIAN_VERSION}" = "xbookworm" ]; then
         sed -i 's/libssl1.1/libssl3/' debian/control
     fi
     dch -b -m -D "$DEBIAN_VERSION" --force-distribution -v "1:${VERSION}-${DEB_RELEASE}.${DEBIAN_VERSION}" 'Update distribution'
