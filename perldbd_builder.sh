@@ -449,9 +449,9 @@ build_deb(){
     if [ "x${DEBIAN_VERSION}" = "xxenial" ]; then
         sed -i 's/libssl1.1/libssl1.0.0/' debian/control
     fi
-    if [ "x${DEBIAN_VERSION}" = "xjammy" ]; then$
-        sed -i 's/libssl1.1/libssl3/' debian/control$
-    fi$
+    if [ "x${DEBIAN_VERSION}" = "xjammy" ]; then
+        sed -i 's/libssl1.1/libssl3/' debian/control
+    fi
     if [ "x${DEBIAN_VERSION}" = "xbookworm" ]; then
         sed -i 's/libssl1.1/libssl3/' debian/control
     fi
