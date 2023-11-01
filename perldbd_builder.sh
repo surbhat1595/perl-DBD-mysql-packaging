@@ -484,7 +484,7 @@ INSTALL=0
 RPM_RELEASE=4
 DEB_RELEASE=4
 REVISION=0
-PACKAGING_REPO="https://github.com/adivinho/perl-DBD-mysql-packaging.git"
+PACKAGING_REPO="https://github.com/EvgeniyPatlan/perl-DBD-mysql-packaging.git"
 NAME=perl-DBD-MySQL
 parse_arguments PICK-ARGS-FROM-ARGV "$@"
 VERSION=$DBD_BRANCH
