@@ -75,10 +75,12 @@ check_workdir(){
 }
 
 add_percona_yum_repo(){
-    if [ ! -f /etc/yum.repos.d/percona-dev.repo ]
-    then
-      wget http://jenkins.percona.com/yum-repo/percona-dev.repo
-      mv -f percona-dev.repo /etc/yum.repos.d/
+    if [ "x${RHEL}" == "x7" || "x${RHEL}" == "x8" ]; then
+        if [ ! -f /etc/yum.repos.d/percona-dev.repo ]
+        then
+            wget http://jenkins.percona.com/yum-repo/percona-dev.repo
+            mv -f percona-dev.repo /etc/yum.repos.d/
+        fi
     fi
     yum -y install https://repo.percona.com/yum/percona-release-latest.noarch.rpm
     percona-release enable ps-80 testing
@@ -95,12 +97,12 @@ EOL
     sed -i "s:@@DIST@@:$OS_NAME:g" /etc/apt/sources.list.d/percona-dev.list
   fi
   wget -qO - http://jenkins.percona.com/apt-repo/8507EFA5.pub | apt-key add -
-  wget https://repo.percona.com/apt/pool/testing/p/percona-release/percona-release_1.0-27.generic_all.deb
+  wget https://repo.percona.com/apt/pool/testing/p/percona-release/percona-release_1.0-28.generic_all.deb
   #wget https://repo.percona.com/apt/percona-release_latest.generic_all.deb
   apt update
   apt-get install -y gnupg2
   #dpkg -i percona-release_latest.generic_all.deb
-  dpkg -i percona-release_1.0-27.generic_all.deb
+  dpkg -i percona-release_1.0-28.generic_all.deb
   percona-release enable ps-80 testing
   percona-release enable tools testing
   return
@@ -199,27 +201,33 @@ install_deps() {
     CURPLACE=$(pwd)
     if [ "x$OS" = "xrpm" ]
     then
+        yum -y install epel-release
+        yum -y install gcc-c++
         add_percona_yum_repo
-        yum -y install git wget
-        yum -y install epel-release rpmdevtools bison yum-utils percona-server-devel percona-server-server  perl-ExtUtils-MakeMaker perl-Data-Dumper gcc perl-DBI perl-generators openssl-devel
-	yum -y install gcc-c++
-	yum -y install perl-Devel-CheckLib
-        if [ ${RHEL} == 8 ]; then
-	    dnf module -y disable mysql
-            yum -y install epel-release
-	    dnf config-manager --set-enabled codeready-builder-for-rhel-8-x86_64-rpms
+        if [ "x$RHEL" = "x8" -o "x$RHEL" == "x9" ]; then
+            yum -y install dnf-plugins-core
+            if [ "x$RHEL" = "x8" ]; then
+                dnf module -y disable mysql
+                yum config-manager --set-enabled PowerTools || yum config-manager --set-enabled powertools
+                subscription-manager repos --enable codeready-builder-for-rhel-8-x86_64-rpms
+            else
+                yum-config-manager --enable ol9_codeready_builder
+                yum-config-manager --enable ol9_appstream
+            fi
             dnf clean all
             rm -r /var/cache/dnf
             dnf -y upgrade
             yum -y install openssl-devel rpmdevtools bison yum-utils percona-server-devel percona-server-server perl-ExtUtils-MakeMaker perl-Data-Dumper gcc perl-DBI perl-generators
-            yum -y install http://mirror.centos.org/centos/8/PowerTools/x86_64/os/Packages/perl-Devel-CheckLib-1.11-5.el8.noarch.rpm
+            #yum -y install http://mirror.centos.org/centos/8/PowerTools/x86_64/os/Packages/perl-Devel-CheckLib-1.11-5.el8.noarch.rpm
 	else
+            yum -y install rpmdevtools bison yum-utils percona-server-devel percona-server-server  perl-ExtUtils-MakeMaker perl-Data-Dumper gcc perl-DBI perl-generators openssl-devel
             until yum -y install centos-release-scl; do
                 echo "waiting"
                 sleep 1
             done
             yum -y install  gcc-c++ devtoolset-8-gcc-c++ devtoolset-8-binutils devtoolset-8-gcc devtoolset-8-gcc-c++
         fi
+	yum -y install perl-Devel-CheckLib
         cd $WORKDIR
         link="https://raw.githubusercontent.com/EvgeniyPatlan/perl-DBD-mysql-packaging/master/rpm/perl-DBD-MySQL.spec"
         wget $link
@@ -441,6 +449,12 @@ build_deb(){
     if [ "x${DEBIAN_VERSION}" = "xxenial" ]; then
         sed -i 's/libssl1.1/libssl1.0.0/' debian/control
     fi
+    if [ "x${DEBIAN_VERSION}" = "xjammy" ]; then
+        sed -i 's/libssl1.1/libssl3/' debian/control
+    fi
+    if [ "x${DEBIAN_VERSION}" = "xbookworm" ]; then
+        sed -i 's/libssl1.1/libssl3/' debian/control
+    fi
     dch -b -m -D "$DEBIAN_VERSION" --force-distribution -v "1:${VERSION}-${DEB_RELEASE}.${DEBIAN_VERSION}" 'Update distribution'
     #
     dpkg-buildpackage -rfakeroot -uc -us -b
@@ -467,8 +481,8 @@ ARCH=
 OS=
 DBD_BRANCH="4_050"
 INSTALL=0
-RPM_RELEASE=3
-DEB_RELEASE=3
+RPM_RELEASE=4
+DEB_RELEASE=4
 REVISION=0
 PACKAGING_REPO="https://github.com/EvgeniyPatlan/perl-DBD-mysql-packaging.git"
 NAME=perl-DBD-MySQL

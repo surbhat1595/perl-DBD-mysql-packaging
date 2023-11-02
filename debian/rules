@@ -23,6 +23,9 @@ override_dh_auto_configure:
 	sed -i 's:CCCDLFLAGS = -fPIC:CCCDLFLAGS = -fPIC -fpermissive:' Makefile
 	sed -i 's:-L/usr/lib/x86_64-linux-gnu:/usr/lib/x86_64-linux-gnu/libperconaserverclient.a -L/usr/lib/x86_64-linux-gnu:g' Makefile
 
+override_dh_builddeb:
+	dh_builddeb -- -Zgzip
+
 override_dh_auto_test:
 ifeq (,$(filter nocheck,$(DEB_BUILD_OPTIONS)))
 	# prepare mariadb/mysql server
