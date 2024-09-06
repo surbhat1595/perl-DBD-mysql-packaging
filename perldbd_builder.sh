@@ -214,6 +214,8 @@ install_deps() {
                 yum-config-manager --enable ol9_codeready_builder
                 yum-config-manager --enable ol9_appstream
             fi
+            yum install perl-App-cpanminus -y
+            cpanm Devel::CheckLib
             dnf clean all
             rm -r /var/cache/dnf
             dnf -y upgrade
