@@ -227,7 +227,7 @@ install_deps() {
             done
             yum -y install  gcc-c++ devtoolset-8-gcc-c++ devtoolset-8-binutils devtoolset-8-gcc devtoolset-8-gcc-c++
         fi
-	yum -y install wget git perl-Devel-CheckLib
+	yum -y install wget git
         cd $WORKDIR
         link="https://raw.githubusercontent.com/EvgeniyPatlan/perl-DBD-mysql-packaging/master/rpm/perl-DBD-MySQL.spec"
         wget $link
