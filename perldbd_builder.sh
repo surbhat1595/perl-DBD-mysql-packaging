@@ -210,6 +210,7 @@ install_deps() {
                 dnf module -y disable mysql
                 yum config-manager --set-enabled PowerTools || yum config-manager --set-enabled powertools
                 subscription-manager repos --enable codeready-builder-for-rhel-8-x86_64-rpms
+                yum -y install https://downloads.percona.com/downloads/packaging/perl-Devel-CheckLib-1.11-5.el8.noarch.rpm
             else
                 yum-config-manager --enable ol9_codeready_builder
                 yum-config-manager --enable ol9_appstream
