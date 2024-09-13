@@ -74,6 +74,11 @@ check_workdir(){
     return
 }
 
+switch_to_vault_repo() {
+    sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/CentOS-*
+    sed -i 's|#\s*baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-*
+}
+
 add_percona_yum_repo(){
     if [ "x${RHEL}" == "x7" || "x${RHEL}" == "x8" ]; then
         if [ ! -f /etc/yum.repos.d/percona-dev.repo ]
@@ -201,7 +206,13 @@ install_deps() {
     CURPLACE=$(pwd)
     if [ "x$OS" = "xrpm" ]
     then
+        if [ "x${RHEL}" = "x8" -o "x${RHEL}" = "x7" ]; then
+            switch_to_vault_repo
+        fi
         yum -y install epel-release
+        if [ "x${RHEL}" = "x8" -o "x${RHEL}" = "x7" ]; then
+            switch_to_vault_repo
+        fi
         yum -y install gcc-c++
         add_percona_yum_repo
         if [ "x$RHEL" = "x8" -o "x$RHEL" == "x9" ]; then
@@ -453,7 +464,7 @@ build_deb(){
     if [ "x${DEBIAN_VERSION}" = "xxenial" ]; then
         sed -i 's/libssl1.1/libssl1.0.0/' debian/control
     fi
-    if [ "x${DEBIAN_VERSION}" = "xjammy" -o "x${DEBIAN_VERSION}" = "xbookworm" -o "x${DEBIAN_VERSION}" = "xnoble"]; then
+    if [ x"${DEBIAN_VERSION}" = xjammy -o x"${DEBIAN_VERSION}" = xbookworm -o x"${DEBIAN_VERSION}" = xnoble ]; then
         sed -i 's/libssl1.1/libssl3/' debian/control
     fi
     dch -b -m -D "$DEBIAN_VERSION" --force-distribution -v "1:${VERSION}-${DEB_RELEASE}.${DEBIAN_VERSION}" 'Update distribution'
