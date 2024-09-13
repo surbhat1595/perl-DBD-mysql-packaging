@@ -247,8 +247,8 @@ install_deps() {
     else
         apt-get update
         DEBIAN_FRONTEND=noninteractive apt-get -y install wget
-        add_percona_apt_repo
-        apt-get update
+        #add_percona_apt_repo
+        #apt-get update
         DEBIAN_FRONTEND=noninteractive apt-get -y install devscripts equivs libdevel-checklib-perl libdbd-mysql-perl percona-server-server libperconaserverclient21-dev libssl-dev libtest-deep-perl libtest-deep-type-perl
         CURPLACE=$(pwd)
         cd $WORKDIR
