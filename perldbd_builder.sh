@@ -236,8 +236,9 @@ install_deps() {
         wget $link
         yum-builddep -y $WORKDIR/$NAME.spec
     else
-        add_percona_apt_repo
         apt-get update
+        DEBIAN_FRONTEND=noninteractive apt-get -y install wget
+        add_percona_apt_repo
         ENV export DEBIAN_FRONTEND=noninteractive
         DEBIAN_FRONTEND=noninteractive apt-get -y install devscripts equivs libdevel-checklib-perl libdbd-mysql-perl percona-server-server libperconaserverclient21-dev libssl-dev libtest-deep-perl libtest-deep-type-perl
         CURPLACE=$(pwd)
@@ -452,10 +453,7 @@ build_deb(){
     if [ "x${DEBIAN_VERSION}" = "xxenial" ]; then
         sed -i 's/libssl1.1/libssl1.0.0/' debian/control
     fi
-    if [ "x${DEBIAN_VERSION}" = "xjammy" ]; then
-        sed -i 's/libssl1.1/libssl3/' debian/control
-    fi
-    if [ "x${DEBIAN_VERSION}" = "xbookworm" ]; then
+    if [ "x${DEBIAN_VERSION}" = "xjammy" -o "x${DEBIAN_VERSION}" = "xbookworm" -o "x${DEBIAN_VERSION}" = "xnoble"]; then
         sed -i 's/libssl1.1/libssl3/' debian/control
     fi
     dch -b -m -D "$DEBIAN_VERSION" --force-distribution -v "1:${VERSION}-${DEB_RELEASE}.${DEBIAN_VERSION}" 'Update distribution'
@@ -484,8 +482,8 @@ ARCH=
 OS=
 DBD_BRANCH="4_050"
 INSTALL=0
-RPM_RELEASE=4
-DEB_RELEASE=4
+RPM_RELEASE=5
+DEB_RELEASE=5
 REVISION=0
 PACKAGING_REPO="https://github.com/EvgeniyPatlan/perl-DBD-mysql-packaging.git"
 NAME=perl-DBD-MySQL
