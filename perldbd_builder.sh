@@ -110,8 +110,10 @@ EOL
   apt-get install -y gnupg2 libdbd-mysql-perl
   #dpkg -i percona-release_latest.generic_all.deb
   dpkg -i percona-release_1.0-28.generic_all.deb
-  percona-release enable pdps-8.0.37 testing
-  #percona-release enable tools testing
+  percona-release enable pdps-8.0 testing
+  if [ "x${OS_NAME}" != "xnoble" ]; then
+      percona-release enable tools testing
+  fi
   return
 }
 
