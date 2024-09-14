@@ -107,10 +107,10 @@ EOL
   wget https://repo.percona.com/apt/pool/testing/p/percona-release/percona-release_1.0-28.generic_all.deb
   #wget https://repo.percona.com/apt/percona-release_latest.generic_all.deb
   apt update
-  apt-get install -y gnupg2
+  apt-get install -y gnupg2 libdbd-mysql-perl
   #dpkg -i percona-release_latest.generic_all.deb
   dpkg -i percona-release_1.0-28.generic_all.deb
-  percona-release enable ps-80 testing
+  percona-release enable pdps-8.0.37 testing
   percona-release enable tools testing
   return
 }
