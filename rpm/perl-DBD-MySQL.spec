@@ -1,6 +1,6 @@
 Name:           perl-DBD-MySQL
 Version:        4.050
-Release:        4%{?dist}
+Release:        5%{?dist}
 Epoch:          1
 Summary:        A MySQL interface for Perl
 License:        GPL+ or Artistic
