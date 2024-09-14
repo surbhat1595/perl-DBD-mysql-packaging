@@ -111,7 +111,7 @@ EOL
   #dpkg -i percona-release_latest.generic_all.deb
   dpkg -i percona-release_1.0-28.generic_all.deb
   percona-release enable pdps-8.0.37 testing
-  percona-release enable tools testing
+  #percona-release enable tools testing
   return
 }
 
@@ -251,7 +251,7 @@ install_deps() {
         DEBIAN_FRONTEND=noninteractive apt-get -y install wget
         add_percona_apt_repo
         apt-get update
-        DEBIAN_FRONTEND=noninteractive apt-get -y install devscripts equivs libdevel-checklib-perl libdbd-mysql-perl percona-server-server libperconaserverclient21-dev libssl-dev libtest-deep-perl libtest-deep-type-perl
+        DEBIAN_FRONTEND=noninteractive apt-get -y install devscripts equivs libdevel-checklib-perl percona-server-server libperconaserverclient21-dev libssl-dev libtest-deep-perl libtest-deep-type-perl
         CURPLACE=$(pwd)
         cd $WORKDIR
         link="https://raw.githubusercontent.com/EvgeniyPatlan/perl-DBD-mysql-packaging/master/debian/control"
