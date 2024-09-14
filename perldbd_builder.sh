@@ -94,6 +94,7 @@ add_percona_yum_repo(){
 }
 
 add_percona_apt_repo(){
+/*
   if [ ! -f /etc/apt/sources.list.d/percona-dev.list ]; then
     cat >/etc/apt/sources.list.d/percona-dev.list <<EOL
 deb http://jenkins.percona.com/apt-repo/ @@DIST@@ main
@@ -101,6 +102,7 @@ deb-src http://jenkins.percona.com/apt-repo/ @@DIST@@ main
 EOL
     sed -i "s:@@DIST@@:$OS_NAME:g" /etc/apt/sources.list.d/percona-dev.list
   fi
+*/
   wget -qO - http://jenkins.percona.com/apt-repo/8507EFA5.pub | apt-key add -
   wget https://repo.percona.com/apt/pool/testing/p/percona-release/percona-release_1.0-28.generic_all.deb
   #wget https://repo.percona.com/apt/percona-release_latest.generic_all.deb
@@ -247,8 +249,8 @@ install_deps() {
     else
         apt-get update
         DEBIAN_FRONTEND=noninteractive apt-get -y install wget
-        #add_percona_apt_repo
-        #apt-get update
+        add_percona_apt_repo
+        apt-get update
         DEBIAN_FRONTEND=noninteractive apt-get -y install devscripts equivs libdevel-checklib-perl libdbd-mysql-perl percona-server-server libperconaserverclient21-dev libssl-dev libtest-deep-perl libtest-deep-type-perl
         CURPLACE=$(pwd)
         cd $WORKDIR
