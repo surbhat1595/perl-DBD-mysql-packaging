@@ -110,10 +110,8 @@ EOL
   apt-get install -y gnupg2 libdbd-mysql-perl
   #dpkg -i percona-release_latest.generic_all.deb
   dpkg -i percona-release_1.0-28.generic_all.deb
-  percona-release enable pdps-8.0 testing
-  if [ "x${OS_NAME}" != "xnoble" ]; then
-      percona-release enable tools testing
-  fi
+  percona-release enable ps-80 testing
+  percona-release enable tools testing
   return
 }
 
@@ -253,6 +251,10 @@ install_deps() {
         DEBIAN_FRONTEND=noninteractive apt-get -y install wget
         add_percona_apt_repo
         apt-get update
+        if [ "x${DEBIAN_VERSION}" = "xnoble" ]; then
+            wget http://archive.ubuntu.com/ubuntu/pool/main/o/openssl/libssl1.1_1.1.1f-1ubuntu2_amd64.deb
+            dpkg -i libssl1.1_1.1.1f-1ubuntu2_amd64.deb
+        fi
         DEBIAN_FRONTEND=noninteractive apt-get -y install devscripts equivs libdevel-checklib-perl percona-server-server libperconaserverclient21-dev libssl-dev libtest-deep-perl libtest-deep-type-perl
         CURPLACE=$(pwd)
         cd $WORKDIR
