@@ -248,7 +248,7 @@ install_deps() {
         yum-builddep -y $WORKDIR/$NAME.spec
     else
         apt-get update
-        DEBIAN_FRONTEND=noninteractive apt-get -y install wget
+        DEBIAN_FRONTEND=noninteractive apt-get -y install wget curl gnupg2 lsb-release
         add_percona_apt_repo
         apt-get update
         if [ "x${DEBIAN_VERSION}" = "xnoble" ]; then
