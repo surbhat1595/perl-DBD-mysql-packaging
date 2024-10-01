@@ -94,25 +94,21 @@ add_percona_yum_repo(){
 }
 
 add_percona_apt_repo(){
-/*
-  if [ ! -f /etc/apt/sources.list.d/percona-dev.list ]; then
-    cat >/etc/apt/sources.list.d/percona-dev.list <<EOL
-deb http://jenkins.percona.com/apt-repo/ @@DIST@@ main
-deb-src http://jenkins.percona.com/apt-repo/ @@DIST@@ main
-EOL
-    sed -i "s:@@DIST@@:$OS_NAME:g" /etc/apt/sources.list.d/percona-dev.list
-  fi
-*/
-  wget -qO - http://jenkins.percona.com/apt-repo/8507EFA5.pub | apt-key add -
-  wget https://repo.percona.com/apt/pool/testing/p/percona-release/percona-release_1.0-28.generic_all.deb
-  #wget https://repo.percona.com/apt/percona-release_latest.generic_all.deb
-  apt update
-  apt-get install -y gnupg2 libdbd-mysql-perl
-  #dpkg -i percona-release_latest.generic_all.deb
-  dpkg -i percona-release_1.0-28.generic_all.deb
-  percona-release enable ps-80 testing
-  percona-release enable tools testing
-  return
+#  if [ ! -f /etc/apt/sources.list.d/percona-dev.list ]; then
+#    cat >/etc/apt/sources.list.d/percona-dev.list <<EOL
+#deb http://jenkins.percona.com/apt-repo/ @@DIST@@ main
+#deb-src http://jenkins.percona.com/apt-repo/ @@DIST@@ main
+#EOL
+#    sed -i "s:@@DIST@@:$OS_NAME:g" /etc/apt/sources.list.d/percona-dev.list
+#  fi
+#  wget -qO - http://jenkins.percona.com/apt-repo/8507EFA5.pub | apt-key add -
+   wget https://repo.percona.com/apt/percona-release_latest.generic_all.deb
+   apt update
+   apt-get install -y gnupg2 libdbd-mysql-perl
+   dpkg -i percona-release_latest.generic_all.deb
+   percona-release enable ps-80 testing
+   percona-release enable tools testing
+   return
 }
 
 get_sources(){
