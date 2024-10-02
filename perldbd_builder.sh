@@ -146,7 +146,8 @@ get_sources(){
     git reset --hard
     git clean -xdf
     git checkout $PRBRANCH
-    cp -r debian ./
+    cd ..
+    cp -r packaging/debian ./
     
     cd ${WORKDIR}
 
