@@ -240,7 +240,7 @@ install_deps() {
 	yum -y install wget git
         cd $WORKDIR
         #link="https://raw.githubusercontent.com/EvgeniyPatlan/perl-DBD-mysql-packaging/master/rpm/perl-DBD-MySQL.spec"
-        link="https://raw.githubusercontent.com/adivinho/perl-DBD-mysql-packaging/master/rpm/perl-DBD-MySQL.spec"
+        link="https://raw.githubusercontent.com/adivinho/perl-DBD-mysql-packaging/PKG-101-remove-centos-7-from-perl-DBD-MySQL-building-jobs/rpm/perl-DBD-MySQL.spec"
         wget $link
         yum-builddep -y $WORKDIR/$NAME.spec
     else
