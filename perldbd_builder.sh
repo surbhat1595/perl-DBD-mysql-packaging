@@ -142,7 +142,7 @@ get_sources(){
     REVISION=$(git rev-parse --short HEAD)
     #
     git clone $PACKAGING_REPO packaging
-    cp packaging
+    cd packaging
     git reset --hard
     git clean -xdf
     git checkout $PRBRANCH
