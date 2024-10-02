@@ -239,7 +239,8 @@ install_deps() {
         fi
 	yum -y install wget git
         cd $WORKDIR
-        link="https://raw.githubusercontent.com/EvgeniyPatlan/perl-DBD-mysql-packaging/master/rpm/perl-DBD-MySQL.spec"
+        #link="https://raw.githubusercontent.com/EvgeniyPatlan/perl-DBD-mysql-packaging/master/rpm/perl-DBD-MySQL.spec"
+        link="https://raw.githubusercontent.com/adivinho/perl-DBD-mysql-packaging/master/rpm/perl-DBD-MySQL.spec"
         wget $link
         yum-builddep -y $WORKDIR/$NAME.spec
     else

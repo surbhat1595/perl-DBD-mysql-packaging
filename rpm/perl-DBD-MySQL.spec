@@ -74,7 +74,6 @@ find %{buildroot} -type f -name '*.bs' -empty -delete
 %doc LICENSE
 %doc Changes
 %doc README.md
-%{perl_vendorarch}/Bundle/
 %{perl_vendorarch}/DBD/
 %{perl_vendorarch}/auto/DBD/
 %{_mandir}/man3/*.3*
