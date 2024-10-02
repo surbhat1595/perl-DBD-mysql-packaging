@@ -46,8 +46,11 @@ parse_arguments() {
             --build_deb=*) DEB="$val" ;;
             --get_sources=*) SOURCE="$val" ;;
             --branch=*) DBD_BRANCH="$val" ;;
-            --tpc_branch=*) TPC_BRANCH="$val" ;;
+            --package_repo=*) PACKAGING_REPO="$val" ;;
+            --package_repo_branch=*) PRBRANCH="$val" ;;
             --install_deps=*) INSTALL="$val" ;;
+            --rpm_release=*) RPM_RELEASE="$val" ;;
+            --deb_release=*) DEB_RELEASE="$val" ;;
             --help) usage ;;      
             *)
               if test -n "$pick_args"
@@ -139,7 +142,11 @@ get_sources(){
     REVISION=$(git rev-parse --short HEAD)
     #
     git clone $PACKAGING_REPO packaging
-    cp -r packaging/debian ./
+    cp packaging
+    git reset --hard
+    git clean -xdf
+    git checkout $PRBRANCH
+    cp -r debian ./
     
     cd ${WORKDIR}
 
@@ -494,10 +501,10 @@ ARCH=
 OS=
 DBD_BRANCH="4_050"
 INSTALL=0
-RPM_RELEASE=5
-DEB_RELEASE=5
+#RPM_RELEASE=5
+#DEB_RELEASE=5
 REVISION=0
-PACKAGING_REPO="https://github.com/EvgeniyPatlan/perl-DBD-mysql-packaging.git"
+#PACKAGING_REPO="https://github.com/EvgeniyPatlan/perl-DBD-mysql-packaging.git"
 NAME=perl-DBD-MySQL
 parse_arguments PICK-ARGS-FROM-ARGV "$@"
 VERSION=$DBD_BRANCH
