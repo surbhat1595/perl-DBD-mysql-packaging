@@ -250,7 +250,7 @@ install_deps() {
         cd $WORKDIR
         #link="https://raw.githubusercontent.com/EvgeniyPatlan/perl-DBD-mysql-packaging/master/rpm/perl-DBD-MySQL.spec"
         #link="https://raw.githubusercontent.com/adivinho/perl-DBD-mysql-packaging/PKG-101-remove-centos-7-from-perl-DBD-MySQL-building-jobs/rpm/perl-DBD-MySQL.spec"
-        link=$(echo ${PACKAGING_REPO} | sed -re 's|github.com|raw.githubusercontent.com|; s|\\.git\$||')/${PRBRANCH}/rpm/perl-DBD-MySQL.spec"
+        link=$(echo "${PACKAGING_REPO}" | sed -re 's|github.com|raw.githubusercontent.com|; s|\\.git\$||')/"${PRBRANCH}"/rpm/perl-DBD-MySQL.spec
         wget $link
         yum-builddep -y $WORKDIR/$NAME.spec
     else
@@ -266,7 +266,7 @@ install_deps() {
         CURPLACE=$(pwd)
         cd $WORKDIR
         #link="https://raw.githubusercontent.com/EvgeniyPatlan/perl-DBD-mysql-packaging/master/debian/control"
-        link=$(echo ${PACKAGING_REPO} | sed -re 's|github.com|raw.githubusercontent.com|; s|\\.git\$||')/${PRBRANCH}/debian/control"
+        link=$(echo "${PACKAGING_REPO}" | sed -re 's|github.com|raw.githubusercontent.com|; s|\\.git\$||')/"${PRBRANCH}"/debian/control
         wget $link
         cd $CURPLACE
         sed -i 's:apt-get :apt-get -y --allow :g' /usr/bin/mk-build-deps
