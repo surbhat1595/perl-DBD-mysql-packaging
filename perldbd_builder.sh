@@ -146,6 +146,7 @@ get_sources(){
     git reset --hard
     git clean -xdf
     git checkout $PRBRANCH
+    sed -i "s|Release:        [1-9]|Release:        ${RPM_RELEASE}|g" rpm/perl-DBD-MySQL.spec
     cd ..
     cp -r packaging/debian ./
     
@@ -502,8 +503,6 @@ ARCH=
 OS=
 DBD_BRANCH="4_050"
 INSTALL=0
-#RPM_RELEASE=5
-#DEB_RELEASE=5
 REVISION=0
 #PACKAGING_REPO="https://github.com/EvgeniyPatlan/perl-DBD-mysql-packaging.git"
 NAME=perl-DBD-MySQL
