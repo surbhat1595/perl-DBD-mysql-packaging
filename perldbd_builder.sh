@@ -46,8 +46,11 @@ parse_arguments() {
             --build_deb=*) DEB="$val" ;;
             --get_sources=*) SOURCE="$val" ;;
             --branch=*) DBD_BRANCH="$val" ;;
-            --tpc_branch=*) TPC_BRANCH="$val" ;;
+            --package_repo=*) PACKAGING_REPO="$val" ;;
+            --package_repo_branch=*) PRBRANCH="$val" ;;
             --install_deps=*) INSTALL="$val" ;;
+            --rpm_release=*) RPM_RELEASE="$val" ;;
+            --deb_release=*) DEB_RELEASE="$val" ;;
             --help) usage ;;      
             *)
               if test -n "$pick_args"
@@ -74,6 +77,11 @@ check_workdir(){
     return
 }
 
+switch_to_vault_repo() {
+    sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/CentOS-*
+    sed -i 's|#\s*baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-*
+}
+
 add_percona_yum_repo(){
     if [ "x${RHEL}" == "x7" || "x${RHEL}" == "x8" ]; then
         if [ ! -f /etc/yum.repos.d/percona-dev.repo ]
@@ -89,23 +97,21 @@ add_percona_yum_repo(){
 }
 
 add_percona_apt_repo(){
-  if [ ! -f /etc/apt/sources.list.d/percona-dev.list ]; then
-    cat >/etc/apt/sources.list.d/percona-dev.list <<EOL
-deb http://jenkins.percona.com/apt-repo/ @@DIST@@ main
-deb-src http://jenkins.percona.com/apt-repo/ @@DIST@@ main
-EOL
-    sed -i "s:@@DIST@@:$OS_NAME:g" /etc/apt/sources.list.d/percona-dev.list
-  fi
-  wget -qO - http://jenkins.percona.com/apt-repo/8507EFA5.pub | apt-key add -
-  wget https://repo.percona.com/apt/pool/testing/p/percona-release/percona-release_1.0-28.generic_all.deb
-  #wget https://repo.percona.com/apt/percona-release_latest.generic_all.deb
-  apt update
-  apt-get install -y gnupg2
-  #dpkg -i percona-release_latest.generic_all.deb
-  dpkg -i percona-release_1.0-28.generic_all.deb
-  percona-release enable ps-80 testing
-  percona-release enable tools testing
-  return
+#  if [ ! -f /etc/apt/sources.list.d/percona-dev.list ]; then
+#    cat >/etc/apt/sources.list.d/percona-dev.list <<EOL
+#deb http://jenkins.percona.com/apt-repo/ @@DIST@@ main
+#deb-src http://jenkins.percona.com/apt-repo/ @@DIST@@ main
+#EOL
+#    sed -i "s:@@DIST@@:$OS_NAME:g" /etc/apt/sources.list.d/percona-dev.list
+#  fi
+#  wget -qO - http://jenkins.percona.com/apt-repo/8507EFA5.pub | apt-key add -
+   wget https://repo.percona.com/apt/percona-release_latest.generic_all.deb
+   apt update
+   apt-get install -y gnupg2 libdbd-mysql-perl
+   dpkg -i percona-release_latest.generic_all.deb
+   percona-release enable ps-80 testing
+   percona-release enable tools testing
+   return
 }
 
 get_sources(){
@@ -136,6 +142,12 @@ get_sources(){
     REVISION=$(git rev-parse --short HEAD)
     #
     git clone $PACKAGING_REPO packaging
+    cd packaging
+    git reset --hard
+    git clean -xdf
+    git checkout $PRBRANCH
+    sed -i "s|Release:        [1-9]|Release:        ${RPM_RELEASE}|g" rpm/perl-DBD-MySQL.spec
+    cd ..
     cp -r packaging/debian ./
     
     cd ${WORKDIR}
@@ -201,7 +213,13 @@ install_deps() {
     CURPLACE=$(pwd)
     if [ "x$OS" = "xrpm" ]
     then
+        if [ "x${RHEL}" = "x8" -o "x${RHEL}" = "x7" ]; then
+            switch_to_vault_repo
+        fi
         yum -y install epel-release
+        if [ "x${RHEL}" = "x8" -o "x${RHEL}" = "x7" ]; then
+            switch_to_vault_repo
+        fi
         yum -y install gcc-c++
         add_percona_yum_repo
         if [ "x$RHEL" = "x8" -o "x$RHEL" == "x9" ]; then
@@ -210,10 +228,13 @@ install_deps() {
                 dnf module -y disable mysql
                 yum config-manager --set-enabled PowerTools || yum config-manager --set-enabled powertools
                 subscription-manager repos --enable codeready-builder-for-rhel-8-x86_64-rpms
+                yum -y install https://downloads.percona.com/downloads/packaging/perl-Devel-CheckLib-1.11-5.el8.noarch.rpm
             else
                 yum-config-manager --enable ol9_codeready_builder
                 yum-config-manager --enable ol9_appstream
             fi
+            yum install perl-App-cpanminus -y
+            cpanm Devel::CheckLib
             dnf clean all
             rm -r /var/cache/dnf
             dnf -y upgrade
@@ -221,25 +242,28 @@ install_deps() {
             #yum -y install http://mirror.centos.org/centos/8/PowerTools/x86_64/os/Packages/perl-Devel-CheckLib-1.11-5.el8.noarch.rpm
 	else
             yum -y install rpmdevtools bison yum-utils percona-server-devel percona-server-server  perl-ExtUtils-MakeMaker perl-Data-Dumper gcc perl-DBI perl-generators openssl-devel
-            until yum -y install centos-release-scl; do
-                echo "waiting"
-                sleep 1
-            done
-            yum -y install  gcc-c++ devtoolset-8-gcc-c++ devtoolset-8-binutils devtoolset-8-gcc devtoolset-8-gcc-c++
+            yum -y install centos-release-scl
+            switch_to_vault_repo
+            yum -y install gcc-c++ devtoolset-8-gcc-c++ devtoolset-8-binutils devtoolset-8-gcc devtoolset-8-gcc-c++
         fi
-	yum -y install perl-Devel-CheckLib
+	yum -y install wget git
         cd $WORKDIR
-        link="https://raw.githubusercontent.com/EvgeniyPatlan/perl-DBD-mysql-packaging/master/rpm/perl-DBD-MySQL.spec"
+        link=$(echo "${PACKAGING_REPO}" | sed -re 's|github.com|raw.githubusercontent.com|; s|.git$||')/"${PRBRANCH}"/rpm/perl-DBD-MySQL.spec
         wget $link
         yum-builddep -y $WORKDIR/$NAME.spec
     else
+        apt-get update
+        DEBIAN_FRONTEND=noninteractive apt-get -y install wget curl gnupg2 lsb-release
         add_percona_apt_repo
         apt-get update
-        ENV export DEBIAN_FRONTEND=noninteractive
-        DEBIAN_FRONTEND=noninteractive apt-get -y install devscripts equivs libdevel-checklib-perl libdbd-mysql-perl percona-server-server libperconaserverclient21-dev libssl-dev libtest-deep-perl libtest-deep-type-perl
+        if [ "x${DEBIAN_VERSION}" = "xnoble" ]; then
+            wget http://archive.ubuntu.com/ubuntu/pool/main/o/openssl/libssl1.1_1.1.1f-1ubuntu2_amd64.deb
+            dpkg -i libssl1.1_1.1.1f-1ubuntu2_amd64.deb
+        fi
+        DEBIAN_FRONTEND=noninteractive apt-get -y install devscripts equivs libdevel-checklib-perl percona-server-server libperconaserverclient21-dev libssl-dev libtest-deep-perl libtest-deep-type-perl
         CURPLACE=$(pwd)
         cd $WORKDIR
-        link="https://raw.githubusercontent.com/EvgeniyPatlan/perl-DBD-mysql-packaging/master/debian/control"
+        link=$(echo "${PACKAGING_REPO}" | sed -re 's|github.com|raw.githubusercontent.com|; s|.git$||')/"${PRBRANCH}"/debian/control
         wget $link
         cd $CURPLACE
         sed -i 's:apt-get :apt-get -y --allow :g' /usr/bin/mk-build-deps
@@ -449,10 +473,7 @@ build_deb(){
     if [ "x${DEBIAN_VERSION}" = "xxenial" ]; then
         sed -i 's/libssl1.1/libssl1.0.0/' debian/control
     fi
-    if [ "x${DEBIAN_VERSION}" = "xjammy" ]; then
-        sed -i 's/libssl1.1/libssl3/' debian/control
-    fi
-    if [ "x${DEBIAN_VERSION}" = "xbookworm" ]; then
+    if [ x"${DEBIAN_VERSION}" = xjammy -o x"${DEBIAN_VERSION}" = xbookworm -o x"${DEBIAN_VERSION}" = xnoble ]; then
         sed -i 's/libssl1.1/libssl3/' debian/control
     fi
     dch -b -m -D "$DEBIAN_VERSION" --force-distribution -v "1:${VERSION}-${DEB_RELEASE}.${DEBIAN_VERSION}" 'Update distribution'
@@ -481,10 +502,8 @@ ARCH=
 OS=
 DBD_BRANCH="4_050"
 INSTALL=0
-RPM_RELEASE=4
-DEB_RELEASE=4
 REVISION=0
-PACKAGING_REPO="https://github.com/EvgeniyPatlan/perl-DBD-mysql-packaging.git"
+#PACKAGING_REPO="https://github.com/EvgeniyPatlan/perl-DBD-mysql-packaging.git"
 NAME=perl-DBD-MySQL
 parse_arguments PICK-ARGS-FROM-ARGV "$@"
 VERSION=$DBD_BRANCH

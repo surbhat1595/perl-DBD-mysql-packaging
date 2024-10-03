@@ -1,6 +1,6 @@
 Name:           perl-DBD-MySQL
 Version:        4.050
-Release:        4%{?dist}
+Release:        5%{?dist}
 Epoch:          1
 Summary:        A MySQL interface for Perl
 License:        GPL+ or Artistic
@@ -74,7 +74,6 @@ find %{buildroot} -type f -name '*.bs' -empty -delete
 %doc LICENSE
 %doc Changes
 %doc README.md
-%{perl_vendorarch}/Bundle/
 %{perl_vendorarch}/DBD/
 %{perl_vendorarch}/auto/DBD/
 %{_mandir}/man3/*.3*
