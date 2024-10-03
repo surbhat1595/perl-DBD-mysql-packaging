@@ -248,8 +248,6 @@ install_deps() {
         fi
 	yum -y install wget git
         cd $WORKDIR
-        #link="https://raw.githubusercontent.com/EvgeniyPatlan/perl-DBD-mysql-packaging/master/rpm/perl-DBD-MySQL.spec"
-        #link="https://raw.githubusercontent.com/adivinho/perl-DBD-mysql-packaging/PKG-101-remove-centos-7-from-perl-DBD-MySQL-building-jobs/rpm/perl-DBD-MySQL.spec"
         link=$(echo "${PACKAGING_REPO}" | sed -re 's|github.com|raw.githubusercontent.com|; s|.git$||')/"${PRBRANCH}"/rpm/perl-DBD-MySQL.spec
         wget $link
         yum-builddep -y $WORKDIR/$NAME.spec
@@ -265,7 +263,6 @@ install_deps() {
         DEBIAN_FRONTEND=noninteractive apt-get -y install devscripts equivs libdevel-checklib-perl percona-server-server libperconaserverclient21-dev libssl-dev libtest-deep-perl libtest-deep-type-perl
         CURPLACE=$(pwd)
         cd $WORKDIR
-        #link="https://raw.githubusercontent.com/EvgeniyPatlan/perl-DBD-mysql-packaging/master/debian/control"
         link=$(echo "${PACKAGING_REPO}" | sed -re 's|github.com|raw.githubusercontent.com|; s|.git$||')/"${PRBRANCH}"/debian/control
         wget $link
         cd $CURPLACE
