@@ -134,7 +134,7 @@ get_sources(){
     then
         git reset --hard
         git clean -xdf
-        git checkout $BRANCH
+        git checkout $DBD_BRANCH
     fi
 
     rm -f ${WORKDIR}/*.tar.gz
@@ -239,6 +239,16 @@ install_deps() {
             rm -r /var/cache/dnf
             dnf -y upgrade
             yum -y install openssl-devel rpmdevtools bison yum-utils percona-server-devel percona-server-server perl-ExtUtils-MakeMaker perl-Data-Dumper gcc perl-DBI perl-generators
+            yum -y install gcc-toolset-12-gcc gcc-toolset-12-gcc-c++ gcc-toolset-12-binutils gcc-toolset-12-annobin-annocheck gcc-toolset-12-annobin-plugin-gcc gcc-toolset-12-libatomic-devel
+            if [ x"$ARCH" = "xx86_64" ]; then
+                pushd /opt/rh/gcc-toolset-12/root/usr/lib/gcc/x86_64-redhat-linux/12/plugin/
+                ln -s annobin.so gcc-annobin.so
+                popd
+            else
+                pushd /opt/rh/gcc-toolset-12/root/usr/lib/gcc/aarch64-redhat-linux/12/plugin/
+                ln -s annobin.so gcc-annobin.so
+                popd
+            fi
             #yum -y install http://mirror.centos.org/centos/8/PowerTools/x86_64/os/Packages/perl-Devel-CheckLib-1.11-5.el8.noarch.rpm
 	else
             yum -y install rpmdevtools bison yum-utils percona-server-devel percona-server-server  perl-ExtUtils-MakeMaker perl-Data-Dumper gcc perl-DBI perl-generators openssl-devel
@@ -383,6 +393,9 @@ build_rpm(){
     if [ -f /opt/rh/devtoolset-8/enable ]; then
         source /opt/rh/devtoolset-8/enable
     fi
+    if [ -f /opt/rh/gcc-toolset-12/enable ]; then
+        source /opt/rh/gcc-toolset-12/enable
+    fi
     rpmbuild --define "_topdir ${WORKDIR}/rpmbuild" --define "dist .el${RHEL}" --rebuild rpmbuild/SRPMS/${SRCRPM}
     return_code=$?
     if [ $return_code != 0 ]; then
@@ -500,7 +513,7 @@ TARBALL=0
 OS_NAME=
 ARCH=
 OS=
-DBD_BRANCH="4_050"
+DBD_BRANCH="5_011"
 INSTALL=0
 REVISION=0
 #PACKAGING_REPO="https://github.com/EvgeniyPatlan/perl-DBD-mysql-packaging.git"

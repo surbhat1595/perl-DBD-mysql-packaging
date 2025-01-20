@@ -1,6 +1,6 @@
 Name:           perl-DBD-MySQL
-Version:        4.050
-Release:        5%{?dist}
+Version:        5.011
+Release:        1%{?dist}
 Epoch:          1
 Summary:        A MySQL interface for Perl
 License:        GPL+ or Artistic
@@ -45,13 +45,13 @@ management system.
 
 %prep
 
-%setup -q -n %{name}-4_050
+%setup -q -n %{name}-5_011
 
 # Correct file permissions
 find . -type f | xargs chmod -x
 
 %build
-perl Makefile.PL INSTALLDIRS=vendor OPTIMIZE="%{optflags}" NO_PACKLIST=1
+perl Makefile.PL INSTALLDIRS=vendor OPTIMIZE="%{optflags}" NO_PACKLIST=1 NO_PERLLOCAL=1
 sed -i 's:CCCDLFLAGS = -fPIC:CCCDLFLAGS = -fPIC -fpermissive:' Makefile
 sed -i 's:CC = gcc:CC = g++:' Makefile
 sed -i 's:LD = gcc:LD = g++:' Makefile
