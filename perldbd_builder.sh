@@ -191,6 +191,11 @@ get_system(){
         ARCH=$(echo $(uname -m) | sed -e 's:i686:i386:g')
         OS_NAME="el$RHEL"
         OS="rpm"
+    elif [ -f /etc/amazon-linux-release ]; then
+        RHEL=$(rpm --eval %amzn)
+        ARCH=$(echo $(uname -m) | sed -e 's:i686:i386:g')
+        OS_NAME="amzn$RHEL"
+        OS="rpm"
     else
         ARCH=$(uname -m)
         OS_NAME="$(lsb_release -sc)"
@@ -222,14 +227,14 @@ install_deps() {
         fi
         yum -y install gcc-c++
         add_percona_yum_repo
-        if [ "x$RHEL" = "x8" -o "x$RHEL" == "x9" ]; then
+        if [ "x$RHEL" = "x8" -o "x$RHEL" == "x9" -o "x$RHEL" == "x2023" ]; then
             yum -y install dnf-plugins-core
             if [ "x$RHEL" = "x8" ]; then
                 dnf module -y disable mysql
                 yum config-manager --set-enabled PowerTools || yum config-manager --set-enabled powertools
                 subscription-manager repos --enable codeready-builder-for-rhel-8-x86_64-rpms
                 yum -y install https://downloads.percona.com/downloads/packaging/perl-Devel-CheckLib-1.11-5.el8.noarch.rpm
-            else
+            elif [ "x$RHEL" = "x9" ]; then
                 yum-config-manager --enable ol9_codeready_builder
                 yum-config-manager --enable ol9_appstream
             fi
@@ -239,15 +244,19 @@ install_deps() {
             rm -r /var/cache/dnf
             dnf -y upgrade
             yum -y install openssl-devel rpmdevtools bison yum-utils percona-server-devel percona-server-server perl-ExtUtils-MakeMaker perl-Data-Dumper gcc perl-DBI perl-generators
-            yum -y install gcc-toolset-12-gcc gcc-toolset-12-gcc-c++ gcc-toolset-12-binutils gcc-toolset-12-annobin-annocheck gcc-toolset-12-annobin-plugin-gcc gcc-toolset-12-libatomic-devel
-            if [ x"$ARCH" = "xx86_64" ]; then
-                pushd /opt/rh/gcc-toolset-12/root/usr/lib/gcc/x86_64-redhat-linux/12/plugin/
-                ln -s annobin.so gcc-annobin.so
-                popd
+            if [ "x$RHEL" != "x2023" ]; then
+                yum -y install gcc-toolset-12-gcc gcc-toolset-12-gcc-c++ gcc-toolset-12-binutils gcc-toolset-12-annobin-annocheck gcc-toolset-12-annobin-plugin-gcc gcc-toolset-12-libatomic-devel
+                if [ x"$ARCH" = "xx86_64" ]; then
+                    pushd /opt/rh/gcc-toolset-12/root/usr/lib/gcc/x86_64-redhat-linux/12/plugin/
+                    ln -s annobin.so gcc-annobin.so
+                    popd
+                else
+                    pushd /opt/rh/gcc-toolset-12/root/usr/lib/gcc/aarch64-redhat-linux/12/plugin/
+                    ln -s annobin.so gcc-annobin.so
+                    popd
+                fi
             else
-                pushd /opt/rh/gcc-toolset-12/root/usr/lib/gcc/aarch64-redhat-linux/12/plugin/
-                ln -s annobin.so gcc-annobin.so
-                popd
+                yum -y install gcc-c++ libatomic annobin-annocheck annobin-plugin-gcc
             fi
             #yum -y install http://mirror.centos.org/centos/8/PowerTools/x86_64/os/Packages/perl-Devel-CheckLib-1.11-5.el8.noarch.rpm
 	else
@@ -256,7 +265,7 @@ install_deps() {
             switch_to_vault_repo
             yum -y install gcc-c++ devtoolset-8-gcc-c++ devtoolset-8-binutils devtoolset-8-gcc devtoolset-8-gcc-c++
         fi
-	yum -y install wget git
+	yum -y install wget git rpm-build
         cd $WORKDIR
         link=$(echo "${PACKAGING_REPO}" | sed -re 's|github.com|raw.githubusercontent.com|; s|.git$||')/"${PRBRANCH}"/rpm/perl-DBD-MySQL.spec
         wget $link
@@ -396,7 +405,7 @@ build_rpm(){
     if [ -f /opt/rh/gcc-toolset-12/enable ]; then
         source /opt/rh/gcc-toolset-12/enable
     fi
-    rpmbuild --define "_topdir ${WORKDIR}/rpmbuild" --define "dist .el${RHEL}" --rebuild rpmbuild/SRPMS/${SRCRPM}
+    rpmbuild --define "_topdir ${WORKDIR}/rpmbuild" --define "dist .${OS_NAME}" --rebuild rpmbuild/SRPMS/${SRCRPM}
     return_code=$?
     if [ $return_code != 0 ]; then
         exit $return_code
