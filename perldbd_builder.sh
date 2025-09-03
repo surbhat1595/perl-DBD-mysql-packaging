@@ -83,28 +83,13 @@ switch_to_vault_repo() {
 }
 
 add_percona_yum_repo(){
-    if [ "x${RHEL}" = "x7" || "x${RHEL}" = "x8" ]; then
-        if [ ! -f /etc/yum.repos.d/percona-dev.repo ]
-        then
-            wget http://jenkins.percona.com/yum-repo/percona-dev.repo
-            mv -f percona-dev.repo /etc/yum.repos.d/
-        fi
-    fi
     yum -y install https://repo.percona.com/yum/percona-release-latest.noarch.rpm
-    percona-release enable ps-80 testing
+    percona-release enable ps-84-lts testing
     percona-release enable tools testing
     return
 }
 
 add_percona_apt_repo(){
-#  if [ ! -f /etc/apt/sources.list.d/percona-dev.list ]; then
-#    cat >/etc/apt/sources.list.d/percona-dev.list <<EOL
-#deb http://jenkins.percona.com/apt-repo/ @@DIST@@ main
-#deb-src http://jenkins.percona.com/apt-repo/ @@DIST@@ main
-#EOL
-#    sed -i "s:@@DIST@@:$OS_NAME:g" /etc/apt/sources.list.d/percona-dev.list
-#  fi
-#  wget -qO - http://jenkins.percona.com/apt-repo/8507EFA5.pub | apt-key add -
    wget https://repo.percona.com/apt/percona-release_latest.generic_all.deb
    apt update
    apt-get install -y gnupg2 libdbd-mysql-perl
@@ -254,8 +239,6 @@ install_deps() {
                     ln -s annobin.so gcc-annobin.so
                     popd
                 fi
-            else
-                yum -y install rpm-build
             fi
             #yum -y install http://mirror.centos.org/centos/8/PowerTools/x86_64/os/Packages/perl-Devel-CheckLib-1.11-5.el8.noarch.rpm
 	else
