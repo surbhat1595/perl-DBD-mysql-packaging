@@ -94,7 +94,7 @@ add_percona_apt_repo(){
    apt update
    apt-get install -y gnupg2 libdbd-mysql-perl
    dpkg -i percona-release_latest.generic_all.deb
-   percona-release enable ps-84-lts testing
+   percona-release enable ps-80 testing
    percona-release enable tools testing
    return
 }
