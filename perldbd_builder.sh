@@ -216,13 +216,17 @@ install_deps() {
         if [ "x${RHEL}" = "x8" -o "x${RHEL}" = "x7" ]; then
             switch_to_vault_repo
         fi
-        yum -y install epel-release
+        if [ "x${RHEL}" = "x10" ]; then
+            dnf install https://dl.fedoraproject.org/pub/epel/epel-release-latest-10.noarch.rpm
+        else
+            yum -y install epel-release
+        fi
         if [ "x${RHEL}" = "x8" -o "x${RHEL}" = "x7" ]; then
             switch_to_vault_repo
         fi
         yum -y install gcc-c++
         add_percona_yum_repo
-        if [ "x$RHEL" = "x8" -o "x$RHEL" == "x9" ]; then
+        if [ "$RHEL" -ge 8 ]; then
             yum -y install dnf-plugins-core
             if [ "x$RHEL" = "x8" ]; then
                 dnf module -y disable mysql
@@ -230,8 +234,8 @@ install_deps() {
                 subscription-manager repos --enable codeready-builder-for-rhel-8-x86_64-rpms
                 yum -y install https://downloads.percona.com/downloads/packaging/perl-Devel-CheckLib-1.11-5.el8.noarch.rpm
             else
-                yum-config-manager --enable ol9_codeready_builder
-                yum-config-manager --enable ol9_appstream
+                yum-config-manager --enable ol"${RHEL}"_codeready_builder
+                yum-config-manager --enable ol"${RHEL}"_appstream
             fi
             yum install perl-App-cpanminus -y
             cpanm Devel::CheckLib
