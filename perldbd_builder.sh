@@ -83,7 +83,7 @@ switch_to_vault_repo() {
 }
 
 add_percona_yum_repo(){
-    if [ "x${RHEL}" == "x7" || "x${RHEL}" == "x8" ]; then
+    if [ "x${RHEL}" = "x7" || "x${RHEL}" = "x8" ]; then
         if [ ! -f /etc/yum.repos.d/percona-dev.repo ]
         then
             wget http://jenkins.percona.com/yum-repo/percona-dev.repo
@@ -109,7 +109,7 @@ add_percona_apt_repo(){
    apt update
    apt-get install -y gnupg2 libdbd-mysql-perl
    dpkg -i percona-release_latest.generic_all.deb
-   percona-release enable ps-80 testing
+   percona-release enable ps-84-lts testing
    percona-release enable tools testing
    return
 }
@@ -243,15 +243,19 @@ install_deps() {
             rm -r /var/cache/dnf
             dnf -y upgrade
             yum -y install openssl-devel rpmdevtools bison yum-utils percona-server-devel percona-server-server perl-ExtUtils-MakeMaker perl-Data-Dumper gcc perl-DBI perl-generators
-            yum -y install gcc-toolset-12-gcc gcc-toolset-12-gcc-c++ gcc-toolset-12-binutils gcc-toolset-12-annobin-annocheck gcc-toolset-12-annobin-plugin-gcc gcc-toolset-12-libatomic-devel
-            if [ x"$ARCH" = "xx86_64" ]; then
-                pushd /opt/rh/gcc-toolset-12/root/usr/lib/gcc/x86_64-redhat-linux/12/plugin/
-                ln -s annobin.so gcc-annobin.so
-                popd
+            if [ "$RHEL" -le 9 ]; then
+                yum -y install gcc-toolset-12-gcc gcc-toolset-12-gcc-c++ gcc-toolset-12-binutils gcc-toolset-12-annobin-annocheck gcc-toolset-12-annobin-plugin-gcc gcc-toolset-12-libatomic-devel
+                if [ x"$ARCH" = "xx86_64" ]; then
+                    pushd /opt/rh/gcc-toolset-12/root/usr/lib/gcc/x86_64-redhat-linux/12/plugin/
+                    ln -s annobin.so gcc-annobin.so
+                    popd
+                else
+                    pushd /opt/rh/gcc-toolset-12/root/usr/lib/gcc/aarch64-redhat-linux/12/plugin/
+                    ln -s annobin.so gcc-annobin.so
+                    popd
+                fi
             else
-                pushd /opt/rh/gcc-toolset-12/root/usr/lib/gcc/aarch64-redhat-linux/12/plugin/
-                ln -s annobin.so gcc-annobin.so
-                popd
+                yum -y install rpm-build
             fi
             #yum -y install http://mirror.centos.org/centos/8/PowerTools/x86_64/os/Packages/perl-Devel-CheckLib-1.11-5.el8.noarch.rpm
 	else
