@@ -131,7 +131,8 @@ get_sources(){
     git reset --hard
     git clean -xdf
     git checkout $PRBRANCH
-    sed -i "s|^\(Version:\s*\).*|\1${VERSION}|" rpm/perl-DBD-MySQL.spec
+    VERSION_TMP=$(echo ${VERSION}| sed -e 's:_:.:')
+    sed -i "s|^\(Version:\s*\).*|\1${VERSION_TMP}|" rpm/perl-DBD-MySQL.spec
     sed -i "s|Release:        [1-9]|Release:        ${RPM_RELEASE}|g" rpm/perl-DBD-MySQL.spec
     cd ..
     cp -r packaging/debian ./
