@@ -260,7 +260,7 @@ install_deps() {
         DEBIAN_FRONTEND=noninteractive apt-get -y install wget curl gnupg2 lsb-release
         add_percona_apt_repo
         apt-get update
-        if [ "x${DEBIAN_VERSION}" = "xnoble" ]; then
+        if [ "x${DEBIAN_VERSION}" = "xnoble" -o "x${DEBIAN_VERSION}" = "xtrixie"]; then
             wget http://archive.ubuntu.com/ubuntu/pool/main/o/openssl/libssl1.1_1.1.1f-1ubuntu2_amd64.deb
             dpkg -i libssl1.1_1.1.1f-1ubuntu2_amd64.deb
         fi
@@ -480,7 +480,7 @@ build_deb(){
     if [ "x${DEBIAN_VERSION}" = "xxenial" ]; then
         sed -i 's/libssl1.1/libssl1.0.0/' debian/control
     fi
-    if [ x"${DEBIAN_VERSION}" = xjammy -o x"${DEBIAN_VERSION}" = xbookworm -o x"${DEBIAN_VERSION}" = xnoble ]; then
+    if [ x"${DEBIAN_VERSION}" = xjammy -o x"${DEBIAN_VERSION}" = xbookworm -o x"${DEBIAN_VERSION}" = xnoble -o x"${DEBIAN_VERSION}" = xtrixie ]; then
         sed -i 's/libssl1.1/libssl3/' debian/control
     fi
     dch -b -m -D "$DEBIAN_VERSION" --force-distribution -v "1:${VERSION}-${DEB_RELEASE}.${DEBIAN_VERSION}" 'Update distribution'
