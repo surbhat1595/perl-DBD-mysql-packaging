@@ -181,8 +181,9 @@ get_system(){
         OS="rpm"
     else
         ARCH=$(uname -m)
-        OS_NAME="$(lsb_release -sc)"
+        #OS_NAME="$(lsb_release -sc)"
         OS="deb"
+        OS_NAME="$(sed -n 's/^VERSION_CODENAME=\(.*\)/\1/p' /etc/os-release)"
     fi
     return
 }
@@ -260,7 +261,8 @@ install_deps() {
         DEBIAN_FRONTEND=noninteractive apt-get -y install wget curl gnupg2 lsb-release
         add_percona_apt_repo
         apt-get update
-        if [ "x${DEBIAN_VERSION}" = "xnoble" -o "x${DEBIAN_VERSION}" = "xtrixie"]; then
+        export DEBIAN_VERSION="$(sed -n 's/^VERSION_CODENAME=\(.*\)/\1/p' /etc/os-release)"
+        if [ "x${DEBIAN_VERSION}" = "xnoble" -o "x${DEBIAN_VERSION}" = "xtrixie" ]; then
             wget http://archive.ubuntu.com/ubuntu/pool/main/o/openssl/libssl1.1_1.1.1f-1ubuntu2_amd64.deb
             dpkg -i libssl1.1_1.1.1f-1ubuntu2_amd64.deb
         fi
