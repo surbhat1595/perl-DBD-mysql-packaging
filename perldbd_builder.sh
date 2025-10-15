@@ -84,7 +84,7 @@ switch_to_vault_repo() {
 
 add_percona_yum_repo(){
     yum -y install https://repo.percona.com/yum/percona-release-latest.noarch.rpm
-    percona-release enable ps-84-lts experimental
+    percona-release enable ps-84-lts testing
     percona-release enable tools testing
     return
 }
