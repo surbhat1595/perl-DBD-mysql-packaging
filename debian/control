@@ -3,7 +3,7 @@ Maintainer: Percona Development Team <info@percona.com>
 Section: perl
 Priority: optional
 Build-Depends: debhelper,
-               libperconaserverclient21-dev | libperconaserverclient20-dev | libperconaserverclient18.1-dev,
+               libperconaserverclient22-dev | libperconaserverclient21-dev | libperconaserverclient20-dev | libperconaserverclient18.1-dev,
                percona-server-server,
                libdbi-perl,
                libtest-deep-perl,

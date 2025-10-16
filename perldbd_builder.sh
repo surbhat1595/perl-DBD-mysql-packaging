@@ -83,33 +83,18 @@ switch_to_vault_repo() {
 }
 
 add_percona_yum_repo(){
-    if [ "x${RHEL}" == "x7" || "x${RHEL}" == "x8" ]; then
-        if [ ! -f /etc/yum.repos.d/percona-dev.repo ]
-        then
-            wget http://jenkins.percona.com/yum-repo/percona-dev.repo
-            mv -f percona-dev.repo /etc/yum.repos.d/
-        fi
-    fi
     yum -y install https://repo.percona.com/yum/percona-release-latest.noarch.rpm
-    percona-release enable ps-80 testing
+    percona-release enable ps-84-lts testing
     percona-release enable tools testing
     return
 }
 
 add_percona_apt_repo(){
-#  if [ ! -f /etc/apt/sources.list.d/percona-dev.list ]; then
-#    cat >/etc/apt/sources.list.d/percona-dev.list <<EOL
-#deb http://jenkins.percona.com/apt-repo/ @@DIST@@ main
-#deb-src http://jenkins.percona.com/apt-repo/ @@DIST@@ main
-#EOL
-#    sed -i "s:@@DIST@@:$OS_NAME:g" /etc/apt/sources.list.d/percona-dev.list
-#  fi
-#  wget -qO - http://jenkins.percona.com/apt-repo/8507EFA5.pub | apt-key add -
    wget https://repo.percona.com/apt/percona-release_latest.generic_all.deb
    apt update
    apt-get install -y gnupg2 libdbd-mysql-perl
    dpkg -i percona-release_latest.generic_all.deb
-   percona-release enable ps-80 testing
+   percona-release enable ps-84-lts experimental
    percona-release enable tools testing
    return
 }
@@ -146,7 +131,10 @@ get_sources(){
     git reset --hard
     git clean -xdf
     git checkout $PRBRANCH
+    VERSION_TMP=$(echo ${VERSION}| sed -e 's:_:.:')
+    sed -i "s|^\(Version:\s*\).*|\1${VERSION_TMP}|" rpm/perl-DBD-MySQL.spec
     sed -i "s|Release:        [1-9]|Release:        ${RPM_RELEASE}|g" rpm/perl-DBD-MySQL.spec
+    sed -i "s|^\(%setup -q -n %{name}-\)[0-9A-Za-z._-]*|\1${VERSION}|" rpm/perl-DBD-MySQL.spec
     cd ..
     cp -r packaging/debian ./
     
@@ -193,8 +181,9 @@ get_system(){
         OS="rpm"
     else
         ARCH=$(uname -m)
-        OS_NAME="$(lsb_release -sc)"
+        #OS_NAME="$(lsb_release -sc)"
         OS="deb"
+        OS_NAME="$(sed -n 's/^VERSION_CODENAME=\(.*\)/\1/p' /etc/os-release)"
     fi
     return
 }
@@ -216,13 +205,17 @@ install_deps() {
         if [ "x${RHEL}" = "x8" -o "x${RHEL}" = "x7" ]; then
             switch_to_vault_repo
         fi
-        yum -y install epel-release
+        if [ "x${RHEL}" = "x10" ]; then
+            dnf install https://dl.fedoraproject.org/pub/epel/epel-release-latest-10.noarch.rpm
+        else
+            yum -y install epel-release
+        fi
         if [ "x${RHEL}" = "x8" -o "x${RHEL}" = "x7" ]; then
             switch_to_vault_repo
         fi
         yum -y install gcc-c++
         add_percona_yum_repo
-        if [ "x$RHEL" = "x8" -o "x$RHEL" == "x9" ]; then
+        if [ "$RHEL" -ge 8 ]; then
             yum -y install dnf-plugins-core
             if [ "x$RHEL" = "x8" ]; then
                 dnf module -y disable mysql
@@ -230,8 +223,8 @@ install_deps() {
                 subscription-manager repos --enable codeready-builder-for-rhel-8-x86_64-rpms
                 yum -y install https://downloads.percona.com/downloads/packaging/perl-Devel-CheckLib-1.11-5.el8.noarch.rpm
             else
-                yum-config-manager --enable ol9_codeready_builder
-                yum-config-manager --enable ol9_appstream
+                yum-config-manager --enable ol"${RHEL}"_codeready_builder
+                yum-config-manager --enable ol"${RHEL}"_appstream
             fi
             yum install perl-App-cpanminus -y
             cpanm Devel::CheckLib
@@ -239,15 +232,17 @@ install_deps() {
             rm -r /var/cache/dnf
             dnf -y upgrade
             yum -y install openssl-devel rpmdevtools bison yum-utils percona-server-devel percona-server-server perl-ExtUtils-MakeMaker perl-Data-Dumper gcc perl-DBI perl-generators
-            yum -y install gcc-toolset-12-gcc gcc-toolset-12-gcc-c++ gcc-toolset-12-binutils gcc-toolset-12-annobin-annocheck gcc-toolset-12-annobin-plugin-gcc gcc-toolset-12-libatomic-devel
-            if [ x"$ARCH" = "xx86_64" ]; then
-                pushd /opt/rh/gcc-toolset-12/root/usr/lib/gcc/x86_64-redhat-linux/12/plugin/
-                ln -s annobin.so gcc-annobin.so
-                popd
-            else
-                pushd /opt/rh/gcc-toolset-12/root/usr/lib/gcc/aarch64-redhat-linux/12/plugin/
-                ln -s annobin.so gcc-annobin.so
-                popd
+            if [ "$RHEL" -le 9 ]; then
+                yum -y install gcc-toolset-12-gcc gcc-toolset-12-gcc-c++ gcc-toolset-12-binutils gcc-toolset-12-annobin-annocheck gcc-toolset-12-annobin-plugin-gcc gcc-toolset-12-libatomic-devel
+                if [ x"$ARCH" = "xx86_64" ]; then
+                    pushd /opt/rh/gcc-toolset-12/root/usr/lib/gcc/x86_64-redhat-linux/12/plugin/
+                    ln -s annobin.so gcc-annobin.so
+                    popd
+                else
+                    pushd /opt/rh/gcc-toolset-12/root/usr/lib/gcc/aarch64-redhat-linux/12/plugin/
+                    ln -s annobin.so gcc-annobin.so
+                    popd
+                fi
             fi
             #yum -y install http://mirror.centos.org/centos/8/PowerTools/x86_64/os/Packages/perl-Devel-CheckLib-1.11-5.el8.noarch.rpm
 	else
@@ -266,11 +261,13 @@ install_deps() {
         DEBIAN_FRONTEND=noninteractive apt-get -y install wget curl gnupg2 lsb-release
         add_percona_apt_repo
         apt-get update
-        if [ "x${DEBIAN_VERSION}" = "xnoble" ]; then
+        export DEBIAN_VERSION="$(sed -n 's/^VERSION_CODENAME=\(.*\)/\1/p' /etc/os-release)"
+        if [ "x${DEBIAN_VERSION}" = "xnoble" -o "x${DEBIAN_VERSION}" = "xtrixie" ]; then
             wget http://archive.ubuntu.com/ubuntu/pool/main/o/openssl/libssl1.1_1.1.1f-1ubuntu2_amd64.deb
             dpkg -i libssl1.1_1.1.1f-1ubuntu2_amd64.deb
         fi
-        DEBIAN_FRONTEND=noninteractive apt-get -y install devscripts equivs libdevel-checklib-perl percona-server-server libperconaserverclient21-dev libssl-dev libtest-deep-perl libtest-deep-type-perl
+        DEBIAN_FRONTEND=noninteractive apt-get -y install devscripts equivs libdevel-checklib-perl libssl-dev libtest-deep-perl libtest-deep-type-perl
+        DEBIAN_FRONTEND=noninteractive apt-get -y install percona-server-server libperconaserverclient22-dev
         CURPLACE=$(pwd)
         cd $WORKDIR
         link=$(echo "${PACKAGING_REPO}" | sed -re 's|github.com|raw.githubusercontent.com|; s|.git$||')/"${PRBRANCH}"/debian/control
@@ -486,7 +483,7 @@ build_deb(){
     if [ "x${DEBIAN_VERSION}" = "xxenial" ]; then
         sed -i 's/libssl1.1/libssl1.0.0/' debian/control
     fi
-    if [ x"${DEBIAN_VERSION}" = xjammy -o x"${DEBIAN_VERSION}" = xbookworm -o x"${DEBIAN_VERSION}" = xnoble ]; then
+    if [ x"${DEBIAN_VERSION}" = xjammy -o x"${DEBIAN_VERSION}" = xbookworm -o x"${DEBIAN_VERSION}" = xnoble -o x"${DEBIAN_VERSION}" = xtrixie ]; then
         sed -i 's/libssl1.1/libssl3/' debian/control
     fi
     dch -b -m -D "$DEBIAN_VERSION" --force-distribution -v "1:${VERSION}-${DEB_RELEASE}.${DEBIAN_VERSION}" 'Update distribution'
