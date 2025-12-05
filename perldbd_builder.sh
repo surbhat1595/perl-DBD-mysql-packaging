@@ -220,16 +220,16 @@ install_deps() {
         fi
         yum -y install gcc-c++
         add_percona_yum_repo
-        if [ "x$RHEL" = "x8" -o "x$RHEL" == "x9" -o "x$RHEL" == "x2023" ]; then
+        if [ "x$RHEL" = "x8" -o "x$RHEL" = "x9" -o "x$RHEL" = "x10" -o "x$RHEL" = "x2023" ]; then
             yum -y install dnf-plugins-core
             if [ "x$RHEL" = "x8" ]; then
                 dnf module -y disable mysql
                 yum config-manager --set-enabled PowerTools || yum config-manager --set-enabled powertools
                 subscription-manager repos --enable codeready-builder-for-rhel-8-x86_64-rpms
                 yum -y install https://downloads.percona.com/downloads/packaging/perl-Devel-CheckLib-1.11-5.el8.noarch.rpm
-            elif [ "x$RHEL" = "x9" ]; then
-                yum-config-manager --enable ol9_codeready_builder
-                yum-config-manager --enable ol9_appstream
+            elif [ "x$RHEL" = "x9" -o "x$RHEL" = "x10" ]; then
+                yum-config-manager --enable ol"${RHEL}"_codeready_builder
+                yum-config-manager --enable ol"${RHEL}"_appstream
             fi
             yum install perl-App-cpanminus -y
             cpanm Devel::CheckLib
